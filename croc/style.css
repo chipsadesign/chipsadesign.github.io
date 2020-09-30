@@ -422,7 +422,8 @@ a:hover {
 
     .lightsource__img {
         /* transform: translate(-50%, -47%) rotate(90deg); */
-        transform: translate(-50%, -50%) scaleX(1.2) rotate(90deg);
+        /* transform: translate(-50%, -50%) scaleX(1.2) rotate(90deg); */
+        transform: translate(-49%, -51%) scaleX(1.12) rotate(90deg);
     }
 
     .masked {
