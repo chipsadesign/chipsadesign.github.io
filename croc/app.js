@@ -90,6 +90,7 @@ window.addEventListener('DOMContentLoaded', () => {
             uColorFrom: { value: new THREE.Color('#120073') }, // gradient start value
             uColorTo: { value: new THREE.Color('#2c003c') }, // gradient end value
             uLightIntensity: { value: 0.4 }, // [0, 1]
+            uGridIntensity: { value: windowWidth <= 767 ? 3 : 1 },
         },
         vertexShader: `
             varying vec2 vUv;
@@ -109,6 +110,7 @@ window.addEventListener('DOMContentLoaded', () => {
             uniform vec3 uColorTo;
             uniform float uLightRadius;
             uniform float uLightIntensity;
+            uniform float uGridIntensity;
             varying vec2 vUv;
             varying vec3 vPosition;
 
@@ -143,7 +145,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 vec4 gridColor = vec4(vec3(1. - box(tile(st, gridZoom), vec2(0.995), 0.01)), 1.);
 
                 // bg gradient + grid
-                vec4 color = mix(gradientColor, gridColor, gridLines * 0.2);
+                vec4 color = mix(gradientColor, gridColor, gridLines * 0.2 * uGridIntensity);
 
                 // define circle
                 float dist = length(gl_FragCoord.xy - uResolution * uMouseVec) * (1. / uLightRadius);
@@ -220,6 +222,7 @@ window.addEventListener('DOMContentLoaded', () => {
         bgMaterial.uniforms.uResolution.value.y = windowHeight;
         lightRadius = getLightRadius();
         bgMaterial.uniforms.uLightRadius.value = lightRadius;
+        bgMaterial.uniforms.uGridIntensity.value = windowWidth <= 767 ? 3 : 1;
 
         if (windowWidth <= 767) {
             textElement.style.setProperty(
