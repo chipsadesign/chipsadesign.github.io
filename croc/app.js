@@ -273,7 +273,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         scrollContainer.addEventListener('scroll', () => {
             const scrollY = scrollContainer.scrollTop;
-            y = Math.min(scrollY * 0.9, windowHeight - 140);
+            y = Math.min(scrollY * 0.9, windowHeight - 110);
         });
     }
 
