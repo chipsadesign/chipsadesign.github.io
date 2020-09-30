@@ -1,6 +1,4 @@
 import * as THREE from 'https://threejs.org/build/three.module.js';
-import Stats from 'https://threejs.org/examples/jsm/libs/stats.module.js';
-// import { GUI } from 'https://threejs.org/examples/jsm/libs/dat.gui.module.js';
 
 function lerp(a, b, n) {
     return (1 - n) * a + n * b;
@@ -10,12 +8,10 @@ function timeout(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-let renderer, camera, stats /* , gui */;
-
 function getLightRadius() {
     switch (true) {
         case window.matchMedia('(max-width: 767px)').matches:
-            return 0.3;
+            return 0.32;
         case window.matchMedia('(max-width: 768px)').matches:
             return 0.32;
         case window.matchMedia('(max-width: 1024px)').matches:
@@ -61,28 +57,23 @@ window.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    renderer = new THREE.WebGLRenderer();
-    renderer.setPixelRatio(window.devicePixelRatio);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ReinhardToneMapping;
     renderer.setSize(windowWidth, windowHeight);
-
-    // stats = new Stats();
-
     container.appendChild(renderer.domElement);
-    // document.body.appendChild(stats.dom);
 
-    camera = new THREE.PerspectiveCamera(
+    const camera = new THREE.PerspectiveCamera(
         75,
         windowWidth / windowHeight,
         1,
         1000,
     );
-    camera.position.set(0, 0, 20);
+    camera.position.set(0, 0, 1);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     const scene = new THREE.Scene();
     const group = new THREE.Group();
-
     scene.add(group);
 
     const bgMaterial = new THREE.ShaderMaterial({
@@ -94,10 +85,10 @@ window.addEventListener('DOMContentLoaded', () => {
             uResolution: {
                 value: new THREE.Vector2(windowWidth, windowHeight),
             },
-            uMouseVec: { value: new THREE.Vector2(0, 0) },
+            uMouseVec: { value: new THREE.Vector2(0, 0) }, // mouse position
             uLightRadius: { value: lightRadius },
-            uColorFrom: { value: new THREE.Color('#120073') },
-            uColorTo: { value: new THREE.Color('#2c003c') },
+            uColorFrom: { value: new THREE.Color('#120073') }, // gradient start value
+            uColorTo: { value: new THREE.Color('#2c003c') }, // gradient end value
             uLightIntensity: { value: 0.4 }, // [0, 1]
         },
         vertexShader: `
@@ -121,19 +112,35 @@ window.addEventListener('DOMContentLoaded', () => {
             varying vec2 vUv;
             varying vec3 vPosition;
 
+            vec2 tile(vec2 _st, float _zoom) {
+                _st *= _zoom;
+                return fract(_st);
+            }
+
+            float box(vec2 _st, vec2 _size, float _smoothEdges) {
+                _size = vec2(0.5) - _size * 0.5;
+                vec2 aa = vec2(_smoothEdges * 0.5);
+                vec2 uv = smoothstep(_size, _size + aa, _st);
+                uv *= smoothstep(_size, _size + aa, vec2(1.) - _st);
+                return uv.x * uv.y;
+            }
+
             void main() {
                 vec2 uv = vUv;
-                vec2 coord = vPosition.xy;
 
                 // Background gradient
-                vec4 gradientColor = vec4(mix(uColorFrom, uColorTo, uv.x + 0.16), 1.0);
+                vec4 gradientColor = vec4(mix(uColorFrom, uColorTo, uv.x + 0.16), 1.);
 
                 // Background grid
-                vec4 gridColor = vec4(1.0, 1.0, 1.0, 1.0);
+                vec2 st = gl_FragCoord.xy / vec2(min(uResolution.x, uResolution.y));
+                vec2 coord = vPosition.xy;
+                float gridZoom = 4.;
+                // vec4 gridColor = vec4(1., 1., 1., 1.);
                 // Compute anti-aliased world-space grid lines
                 vec2 grid = abs(fract(coord - 0.5) - 0.5) / fwidth(coord);
                 float line = min(grid.x, grid.y);
-                float gridLines = 1.0 - min(line, 1.0);
+                float gridLines = 0.3 * (1. - min(line, 0.1));
+                vec4 gridColor = vec4(vec3(1. - box(tile(st, gridZoom), vec2(0.995), 0.01)), 1.);
 
                 // bg gradient + grid
                 vec4 color = mix(gradientColor, gridColor, gridLines * 0.2);
@@ -153,22 +160,26 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     const bgPlane = new THREE.Mesh(
-        new THREE.PlaneBufferGeometry(16, 9, 1, 1),
+        new THREE.PlaneBufferGeometry(1, 1, 1, 1),
         bgMaterial,
     );
     group.add(bgPlane);
 
-    // Stretch the plane to fit the viewport
-    let dist = camera.position.z - bgPlane.position.z;
-    let height = 8; // desired height to fit
-    camera.fov = 2 * Math.atan(height / (2 * dist)) * (180 / Math.PI);
-    camera.updateProjectionMatrix();
+    function fitPlane() {
+        // Stretch the plane to fit the viewport
+        let dist = camera.position.z - bgPlane.position.z;
+        // let height = 8; // desired height to fit
+        let height = 1; // desired height to fit
+        // camera.fov = 2 * Math.atan(height / (2 * dist)) * (180 / Math.PI);
+        camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
+        bgPlane.scale.x = windowWidth / windowHeight;
+        camera.updateProjectionMatrix();
+    }
 
+    fitPlane();
     render();
 
     function render() {
-        // stats.update();
-
         const interpolatedPrevX = lerp(prevX, x, ease);
         const interpolatedPrevY = lerp(prevY, y, ease);
         prevX = interpolatedPrevX > 0.5 ? interpolatedPrevX : x;
@@ -225,6 +236,7 @@ window.addEventListener('DOMContentLoaded', () => {
         renderer.setSize(windowWidth, windowHeight);
         camera.aspect = windowWidth / windowHeight;
         camera.updateProjectionMatrix();
+        fitPlane();
     });
 
     function turnLightOn() {
@@ -256,90 +268,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const scrollContainer = document.querySelector('.js-scroll-container');
 
-        scrollContainer.addEventListener(
-            'scroll',
-            () => {
-                const scrollY = scrollContainer.scrollTop;
-                y = Math.min(scrollY * 0.9, windowHeight - 100);
-            },
-            // { passive: false },
-        );
+        scrollContainer.addEventListener('scroll', () => {
+            const scrollY = scrollContainer.scrollTop;
+            y = Math.min(scrollY * 0.9, windowHeight - 100);
+        });
     }
 
-    // function setGUI() {
-    //     const lightsource1Controller = {
-    //         blendmode: 'none',
-    //         opacity: 1,
-    //     };
-
-    //     const lightsource2Controller = {
-    //         blendmode: 'none',
-    //         opacity: 1,
-    //     };
-
-    //     const blendModes = [
-    //         'none',
-    //         'color',
-    //         'color-burn',
-    //         'color-dodge',
-    //         'darken',
-    //         'difference',
-    //         'exclusion',
-    //         'hard-light',
-    //         'hue',
-    //         'inherit',
-    //         'initial',
-    //         'lighten',
-    //         'luminosity',
-    //         'multiply',
-    //         'normal',
-    //         'overlay',
-    //         'revert',
-    //         'saturation',
-    //         'screen',
-    //         'sort-light',
-    //         'unset',
-    //     ];
-
-    //     gui = new GUI();
-
-    //     var lightsource1Folder = gui.addFolder('Lightsource 1');
-    //     lightsource1Folder
-    //         .add(lightsource1Controller, 'blendmode', blendModes)
-    //         .onChange((value) => {
-    //             Array.from(
-    //                 document.querySelectorAll('.lightsource'),
-    //             )[0].style.mixBlendMode = value;
-    //         });
-    //     lightsource1Folder
-    //         .add(lightsource1Controller, 'opacity', 0, 1, 0.01)
-    //         .onChange((value) => {
-    //             Array.from(
-    //                 document.querySelectorAll('.lightsource'),
-    //             )[0].style.opacity = value;
-    //         });
-    //     lightsource1Folder.open();
-
-    //     var lightsource2Folder = gui.addFolder('Lightsource 2');
-    //     lightsource2Folder
-    //         .add(lightsource2Controller, 'blendmode', blendModes)
-    //         .onChange((value) => {
-    //             Array.from(
-    //                 document.querySelectorAll('.lightsource'),
-    //             )[1].style.mixBlendMode = value;
-    //         });
-    //     lightsource2Folder
-    //         .add(lightsource2Controller, 'opacity', 0, 1, 0.01)
-    //         .onChange((value) => {
-    //             Array.from(
-    //                 document.querySelectorAll('.lightsource'),
-    //             )[1].style.opacity = value;
-    //         });
-    //     lightsource2Folder.open();
-    // }
-
+    // Init
     setTimeout(enableLight, 400);
     lightsources.classList.remove('lightsource--hidden');
-
-    // setGUI();
 });
