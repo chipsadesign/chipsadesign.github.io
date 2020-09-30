@@ -153,7 +153,9 @@ a:hover {
 }
 
 .text {
-    align-self: center;
+    /* align-self: center; */
+    margin-top: 0;
+    margin-bottom: 0;
     grid-column: 4 / 13;
 }
 
