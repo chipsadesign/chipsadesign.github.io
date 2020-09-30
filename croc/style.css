@@ -174,7 +174,6 @@ a:hover {
     top: 0;
     left: 0;
     position: absolute;
-    pointer-events: none;
 }
 
 .lightsource--hidden {
@@ -189,6 +188,7 @@ a:hover {
     left: 0;
     transform: translate3d(calc(-50% + var(--x) * 1px), 0, 0);
     will-change: transform;
+    pointer-events: none;
 }
 
 .lightsource__img {
@@ -406,7 +406,7 @@ a:hover {
         width: calc(100% - 80px);
         height: 15%;
         top: auto;
-        bottom: 0;
+        bottom: 40px;
         left: 40px;
     }
 
