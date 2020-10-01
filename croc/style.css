@@ -430,6 +430,7 @@ a:hover {
         grid-column: 1 / 13;
         padding-left: 40px;
         padding-right: 40px;
+        padding-bottom: 35px;
     }
 
     .text-description {
