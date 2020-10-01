@@ -188,21 +188,40 @@ window.addEventListener('DOMContentLoaded', () => {
         prevY = interpolatedPrevY > 0.5 ? interpolatedPrevY : y;
         prevClientX = lerp(prevClientX, x, ease);
         prevClientY = lerp(prevClientY, y, ease);
+        let maskX = 0;
 
         if (windowWidth <= 767) {
             // mobile
-            bgMaterial.uniforms.uMouseVec.value.x = 1.42;
-            bgMaterial.uniforms.uMouseVec.value.y =
-                -(((windowHeight / 2 - prevClientY) / windowHeight) * 3) + 1.73;
+            const offsetBottom = 70;
+            // bgMaterial.uniforms.uMouseVec.value.x = 1.42;
+            // bgMaterial.uniforms.uMouseVec.value.y =
+            //     -(((windowHeight / 2 - prevClientY) / windowHeight) * 3) + 1.73;
+            bgMaterial.uniforms.uMouseVec.value.x = 1;
+            bgMaterial.uniforms.uMouseVec.value.y = -(
+                ((windowHeight / 2 -
+                    prevClientY -
+                    (offsetBottom + lightsourceRect.height / 2)) /
+                    windowHeight) *
+                    2 -
+                1
+            );
+
+            maskX = textElementRect.left - textElementRect.width / 2;
         } else {
             // desktop
             bgMaterial.uniforms.uMouseVec.value.x =
                 -((windowWidth / 2 - prevClientX) / windowWidth) * 2 + 1;
             bgMaterial.uniforms.uMouseVec.value.y = 1;
+            maskX = -textElementRect.left + prevX;
         }
 
-        const maskX = -textElementRect.left + prevX;
-        const maskY = -(-textElementRect.bottom + prevY);
+        // const maskX = -textElementRect.left + prevX;
+        const maskY = -(
+            -textElementRect.bottom +
+            textElementRect.height +
+            prevY
+        );
+        console.log(textElementRect.bottom);
         textElement.style.setProperty('--mask-x', maskX);
         textElement.style.setProperty('--mask-y', maskY);
         lightsources.style.setProperty('--x', prevX);

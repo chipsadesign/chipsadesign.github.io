@@ -196,9 +196,6 @@ a:hover {
     position: absolute;
     top: 50%;
     left: 50%;
-    /* transform: translate(-46%, -50%); */
-    /* transform: translate(-50%, -50%) scaleY(1.1); */
-    /* transform: translate(-49.5%, -50%) scaleY(1.12); */
     transform: translate(-51%, -51%) scaleY(1.1);
     width: 200%;
     height: auto;
@@ -227,7 +224,6 @@ a:hover {
 }
 
 .lightsources.on .lightsource__img-1 {
-    /* mix-blend-mode: color-dodge; */
     mix-blend-mode: hard-light;
     opacity: 0.5;
 }
@@ -331,10 +327,6 @@ a:hover {
         width: 32vmax;
     }
 
-    /* .lightsources.on .lightsource__img-1 {
-        mix-blend-mode: color-dodge;
-    } */
-
     .header {
         padding-top: 20px;
         line-height: 1;
@@ -421,14 +413,13 @@ a:hover {
     }
 
     .lightsource__img {
-        /* transform: translate(-50%, -47%) rotate(90deg); */
-        /* transform: translate(-50%, -50%) scaleX(1.2) rotate(90deg); */
         transform: translate(-49%, -51%) scaleX(1.12) rotate(90deg);
     }
 
     .masked {
         --mask-image: radial-gradient(
-            circle at 50% calc(var(--mask-y) * 1px),
+            /* circle at 50% calc(var(--mask-y) * 1px), */ circle at
+                calc(var(--mask-x) * 1px) calc(var(--mask-y) * 1px),
             #000 0px,
             #000 var(--mask-size),
             transparent calc(var(--mask-size) * 1.75)
