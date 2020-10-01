@@ -152,8 +152,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
                 // Add a lightbulb effect
                 float ambient = 0.2;
-
-                color = vec4(color.rgb, clamp(1. - color.a * smoothstep(dist * 0.001, 0., 1.) * (1. - ambient), 0., 1.) * uLightIntensity);
+                float lightRadius = 10.;
+                color = vec4(color.rgb, clamp(1. - color.a * smoothstep(dist * 1. / lightRadius * 0.01, 0., 1.) * (1. - ambient), 0., 1.) * uLightIntensity);
                 
                 // Resulting color
                 gl_FragColor = color;
