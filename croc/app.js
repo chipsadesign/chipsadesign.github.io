@@ -170,9 +170,7 @@ window.addEventListener('DOMContentLoaded', () => {
     function fitPlane() {
         // Stretch the plane to fit the viewport
         let dist = camera.position.z - bgPlane.position.z;
-        // let height = 8; // desired height to fit
         let height = 1; // desired height to fit
-        // camera.fov = 2 * Math.atan(height / (2 * dist)) * (180 / Math.PI);
         camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
         bgPlane.scale.x = windowWidth / windowHeight;
         camera.updateProjectionMatrix();
@@ -192,16 +190,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
         if (windowWidth <= 767) {
             // mobile
-            const offsetBottom = 70;
-            // bgMaterial.uniforms.uMouseVec.value.x = 1.42;
-            // bgMaterial.uniforms.uMouseVec.value.y =
-            //     -(((windowHeight / 2 - prevClientY) / windowHeight) * 3) + 1.73;
             bgMaterial.uniforms.uMouseVec.value.x = 1;
             bgMaterial.uniforms.uMouseVec.value.y = -(
-                ((windowHeight / 2 -
-                    prevClientY -
-                    // (offsetBottom + lightsourceRect.height / 2)) /
-                    (0 + lightsourceRect.height / 2)) /
+                ((windowHeight / 2 - prevClientY - lightsourceRect.height / 2) /
                     windowHeight) *
                     2 -
                 1
@@ -216,7 +207,6 @@ window.addEventListener('DOMContentLoaded', () => {
             maskX = -textElementRect.left + prevX;
         }
 
-        // const maskX = -textElementRect.left + prevX;
         const maskY = -(
             -textElementRect.bottom +
             textElementRect.height -
