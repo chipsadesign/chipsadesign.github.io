@@ -200,7 +200,8 @@ window.addEventListener('DOMContentLoaded', () => {
             bgMaterial.uniforms.uMouseVec.value.y = -(
                 ((windowHeight / 2 -
                     prevClientY -
-                    (offsetBottom + lightsourceRect.height / 2)) /
+                    // (offsetBottom + lightsourceRect.height / 2)) /
+                    (0 + lightsourceRect.height / 2)) /
                     windowHeight) *
                     2 -
                 1
