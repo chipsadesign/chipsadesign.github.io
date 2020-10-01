@@ -418,8 +418,7 @@ a:hover {
 
     .masked {
         --mask-image: radial-gradient(
-            /* circle at 50% calc(var(--mask-y) * 1px), */ circle at
-                calc(var(--mask-x) * 1px) calc(var(--mask-y) * 1px),
+            circle at calc(var(--mask-x) * 1px) calc(var(--mask-y) * 1px),
             #000 0px,
             #000 var(--mask-size),
             transparent calc(var(--mask-size) * 1.75)

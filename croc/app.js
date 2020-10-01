@@ -213,7 +213,7 @@ window.addEventListener('DOMContentLoaded', () => {
             35 +
             prevY
         );
-        console.log(textElementRect.bottom);
+
         textElement.style.setProperty('--mask-x', maskX);
         textElement.style.setProperty('--mask-y', maskY);
         lightsources.style.setProperty('--x', prevX);
